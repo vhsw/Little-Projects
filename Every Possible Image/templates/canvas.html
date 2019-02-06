@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block canvas %}
+<canvas id="largeCanvas" width="360" height="360"> </canvas>
+<script src="{{ url_for('static', filename='drawImage.js')}}"></script>
+<script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+<a href="/" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">New Image</a>
+{% endblock %}
