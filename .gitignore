@@ -2,4 +2,4 @@
 .vscode
 *.pyc
 /Numbers\ Persistence/numbers_persistence
-/Dividers Sum/rust/target
+/Divisors Sum/rust/target
