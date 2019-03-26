@@ -9,7 +9,12 @@ for pow in {1..8}
 do
     printf "| $((10**$pow)) " >> $OUT
 done;
-printf "|\n|$(printf "%0.s-" {1..78})|\n" >> $OUT
+printf "|\n" >> $OUT
+for pow in {1..9}
+do
+    printf "| --  " >> $OUT
+done;
+printf "|\n" >> $OUT
 
 
 # data

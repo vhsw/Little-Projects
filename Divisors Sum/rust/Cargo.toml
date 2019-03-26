@@ -1,6 +1,6 @@
 [package]
-name = "dividers_sum"
-version = "0.1.0"
+name = "divisors_sum"
+version = "1.0.0"
 authors = ["Alexey Dubrov <vhsw@ya.ru>"]
 edition = "2018"
 
