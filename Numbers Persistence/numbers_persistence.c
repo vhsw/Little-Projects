@@ -7,7 +7,7 @@
 #define BASE 10
 
 int n_workers = 0;
-size_t found_numbres[] = {0, 0, 0, 0};
+size_t *found_numbres;
 
 int persist(size_t num, size_t steps)
 {
@@ -60,6 +60,7 @@ int main(int argc, char **argv)
     }
     int n_threads = get_nprocs();
     pthread_t threads[n_threads];
+    found_numbres = calloc(n_threads, sizeof(size_t));
     int args[] = {min_persist, n_threads};
     for (int i = 0; i < n_threads; i++)
     {
@@ -74,5 +75,6 @@ int main(int argc, char **argv)
             min_num = found_numbres[i];
 
     printf("%lu\n", min_num);
+    free(found_numbres);
     return (0);
 }
