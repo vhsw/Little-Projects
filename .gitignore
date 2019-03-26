@@ -1,3 +1,5 @@
 .venv/
 .vscode
 *.pyc
+/Numbers\ Persistence/numbers_persistence
+/Dividers Sum/rust/target
