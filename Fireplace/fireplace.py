@@ -1,11 +1,9 @@
+import curses
 import os
 import time
-from random import randint, choice
-import curses
 from collections import deque
-from typing import Union, Dict, Tuple, List
-
-import logging
+from random import choice, randint
+from typing import Dict, List, Tuple, Union
 
 
 class Vector:
