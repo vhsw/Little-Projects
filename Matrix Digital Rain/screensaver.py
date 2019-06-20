@@ -1,35 +1,32 @@
+import curses
 import os
 import time
-from random import randint, choice
-
-import curses
+from random import choice, randint
+from typing import Dict, List, Tuple
 
 
 class CharDrop:
-    def __init__(self, init_x, init_y, velocity, tick, lifespan):
+    def __init__(self, init_x: int,
+                 init_y: int, velocity: int,
+                 tick: int, lifespan: int) -> None:
         self.init_x = init_x
         self.init_y = init_y
         self.velocity = velocity
         self.lifespan = lifespan
         self.tick = tick
-        self.chars = {}
+        self.chars: Dict[int, str] = {}
 
     @staticmethod
-    def get_char():
+    def get_char() -> str:
         chars = "一九七二人入八力十下三千上口土夕大女子小山川木水火犬王正出本右"
         return choice(chars)
 
-    def alive(self, tick):
+    def alive(self, tick: int) -> bool:
         return (tick - self.tick) < self.lifespan
 
-    def get_tick(self, tick):
-        '''
-        returns position and color of characters  tail
-        color from 1 to lifespan
-        '''
+    def get_tick(self, tick: int) -> Dict[Tuple[int, int], Tuple[str, int]]:
         steps = tick - self.tick
         trace = dict()
-        # self.chars.append(self.get_char())
         for age in range(steps):
             time = tick - self.tick - age
             for step in range(self.velocity):
@@ -41,68 +38,66 @@ class CharDrop:
 
 
 class Buffer:
-    def __init__(self, rows, columns, colors):
+    def __init__(self, rows: int = 0, cols: int = 0) -> None:
         self.rows = rows
-        self.columns = columns//2
-        self.density = self.columns//3
-        self.buffer = {}
-        self.colors = colors
-        self.drops = []
+        self.cols = cols
+        self.density = self.cols//3
+        self.drops: List[CharDrop] = []
 
-    def draw_tick(self, tick):
-        traces = dict()
+    def draw_tick(self, tick:int) -> Dict[Tuple[int, int], Tuple[str, int]]:
+        traces: Dict[Tuple[int, int], Tuple[str, int]] = {}
         for drop in self.drops:
             traces.update(drop.get_tick(tick))
-        self.buffer = {}
+        
+        buffer: Dict[Tuple[int, int], Tuple[str, int]] = {}
         for x in range(self.rows):
-            for y in range(self.columns):
+            for y in range(self.cols):
                 char, color = traces.get((x, y), ('  ', 1))
-                if color > self.colors:
-                    color = self.colors
-                self.buffer[(x, y)] = char, color
+                if color > NUM_COLORS:
+                    color = NUM_COLORS
+                buffer[(x, y)] = char, color
         num_chars = randint(1, self.density + 1)
         for _ in range(num_chars):
             chars = "一九七二人入八力十下三千上口土夕大女子小山川木水火犬王正出本右"
             char = choice(chars)
             init_x = randint(0, self.rows//2)
-            init_y = randint(0, self.columns)
+            init_y = randint(0, self.cols)
             velocity = randint(1, 5)
             lifespan = randint(self.rows//2, self.rows)
-            self.drops.append(CharDrop(init_x, init_y, velocity, tick, lifespan))
+            self.drops.append(
+                CharDrop(init_x, init_y, velocity, tick, lifespan))
         self.drops = [drop for drop in self.drops if drop.alive(tick)]
+        return buffer
 
 
-def main(stdscr):
-    # Clear screen
+NUM_COLORS = 6
+
+
+def main(stdscr) -> None: #type: ignore
     curses.curs_set(0)
-    curses.cbreak()
-    curses.noecho()
 
-    stdscr.clear()
-    stdscr.refresh()
-
-    # white
     curses.init_pair(1, 15, curses.COLOR_BLACK)
-    # shades of green
     curses.init_pair(2, 76, curses.COLOR_BLACK)
     curses.init_pair(3, 70, curses.COLOR_BLACK)
     curses.init_pair(4, 64, curses.COLOR_BLACK)
     curses.init_pair(5, 28, curses.COLOR_BLACK)
     curses.init_pair(6, 22, curses.COLOR_BLACK)
 
-    num_colors = 6
-
-    rows, columns = stdscr.getmaxyx()
-    rows -= 1
-    columns -= 1
-    buffer = Buffer(rows, columns, colors=num_colors)
     tick = 0
+    buffer = Buffer()
     while True:
-        buffer.draw_tick(tick)
-        for x in range(buffer.rows):
-            for y in range(buffer.columns):
-                value, color = buffer.buffer[(x, y)]
-                stdscr.addstr(x, y*2, value, curses.color_pair(color))
+        rows, cols = stdscr.getmaxyx()
+        if cols % 2 == 0:
+            pad = 1
+            cols -= 1
+        else:
+            pad = 0
+        cols //= 2
+        if (rows, cols) != (buffer.rows, buffer.cols):
+            buffer = Buffer(rows, cols)
+        
+        for (x, y), (value, color) in buffer.draw_tick(tick).items():
+            stdscr.addstr(x, y*2 + pad, value, curses.color_pair(color))
 
         tick += 1
         stdscr.refresh()
@@ -110,4 +105,7 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    try:
+        curses.wrapper(main)
+    except KeyboardInterrupt:
+        exit(0)
