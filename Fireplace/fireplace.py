@@ -49,7 +49,7 @@ class Particle:
 
 
 class Buffer:
-    def __init__(self, rows: int, columns: int):
+    def __init__(self, rows: int = 0, columns: int = 0):
         self.rows = rows
         self.columns = columns
         self.buffer: dict = {}
@@ -92,21 +92,21 @@ NUM_COLORS = 12
 
 
 def main(stdscr) -> None:  # type: ignore
-    curses.curs_set(False)
+    curses.curs_set(0)
     curses.use_default_colors()
     for i, c in enumerate((15, 228, 192, 191, 190, 184, 178, 172, 166, 202, 130, 242), start=1):
-        curses.init_pair(i, c, curses.COLOR_BLACK)
+        curses.init_pair(i, c, -1)
 
     rows, columns = stdscr.getmaxyx()
-    buffer = Buffer(rows - 1, columns)
+    buffer = Buffer()
     tick = 0
     time_redraw = time.time_ns()
     FPS = 15
     while True:
         # handle resize
-        rows, columns = stdscr.getmaxyx()
-        if (rows, columns) != (buffer.rows + 1, buffer.columns):
-            buffer = Buffer(rows - 1, columns)
+        rows, cols = stdscr.getmaxyx()
+        if (rows, cols) != (buffer.rows, buffer.columns):
+            buffer = Buffer(rows, cols)
 
         stdscr.clear()
         if time.time_ns() < time_redraw:
@@ -115,7 +115,10 @@ def main(stdscr) -> None:  # type: ignore
         time_redraw = time.time_ns() + int(1e9/FPS)
 
         for (row, column), (value, color) in buffer.draw_tick(tick).items():
-            stdscr.addstr(row, column, value, curses.color_pair(color))
+            try:
+                stdscr.addstr(row, column, value, curses.color_pair(color))
+            except curses.error:  # skip trailing character at last line
+                continue
         stdscr.refresh()
         tick += 1
 

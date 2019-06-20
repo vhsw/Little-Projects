@@ -44,11 +44,11 @@ class Buffer:
         self.density = self.cols//3
         self.drops: List[CharDrop] = []
 
-    def draw_tick(self, tick:int) -> Dict[Tuple[int, int], Tuple[str, int]]:
+    def draw_tick(self, tick: int) -> Dict[Tuple[int, int], Tuple[str, int]]:
         traces: Dict[Tuple[int, int], Tuple[str, int]] = {}
         for drop in self.drops:
             traces.update(drop.get_tick(tick))
-        
+
         buffer: Dict[Tuple[int, int], Tuple[str, int]] = {}
         for x in range(self.rows):
             for y in range(self.cols):
@@ -73,32 +73,30 @@ class Buffer:
 NUM_COLORS = 6
 
 
-def main(stdscr) -> None: #type: ignore
+def main(stdscr) -> None:  # type: ignore
     curses.curs_set(0)
+    curses.use_default_colors()
 
-    curses.init_pair(1, 15, curses.COLOR_BLACK)
-    curses.init_pair(2, 76, curses.COLOR_BLACK)
-    curses.init_pair(3, 70, curses.COLOR_BLACK)
-    curses.init_pair(4, 64, curses.COLOR_BLACK)
-    curses.init_pair(5, 28, curses.COLOR_BLACK)
-    curses.init_pair(6, 22, curses.COLOR_BLACK)
+    curses.init_pair(1, 15, -1)
+    curses.init_pair(2, 76, -1)
+    curses.init_pair(3, 70, -1)
+    curses.init_pair(4, 64, -1)
+    curses.init_pair(5, 28, -1)
+    curses.init_pair(6, 22, -1)
 
     tick = 0
     buffer = Buffer()
     while True:
         rows, cols = stdscr.getmaxyx()
-        if cols % 2 == 0:
-            pad = 1
-            cols -= 1
-        else:
-            pad = 0
         cols //= 2
         if (rows, cols) != (buffer.rows, buffer.cols):
             buffer = Buffer(rows, cols)
-        
-        for (x, y), (value, color) in buffer.draw_tick(tick).items():
-            stdscr.addstr(x, y*2 + pad, value, curses.color_pair(color))
 
+        for (x, y), (value, color) in buffer.draw_tick(tick).items():
+            try:
+                stdscr.addstr(x, y*2, value, curses.color_pair(color))
+            except curses.error:  # skip trailing character at last line
+                continue
         tick += 1
         stdscr.refresh()
         time.sleep(0.1)
