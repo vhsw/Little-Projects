@@ -1,42 +1,35 @@
 import os
 import time
 from random import randint, choice
-import numbers
 import curses
 from collections import deque
+from typing import Union, Dict, Tuple, List
+
+import logging
 
 
 class Vector:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.x}, {self.y})'
+    def __repr__(self) -> str:
+        return f'Vector({self.x}, {self.y})'
 
-    def __mul__(self, other):
-        if isinstance(other, numbers.Number):
-            return self.__class__(self.x * other, self.y * other)
-        elif isinstance(other, self.__class__):
-            return self.__class__(self.x * other.x, self.y * other.y)
-        else:
-            raise TypeError(
-                f'cannot multiply {self.__class__.__name__} on {other.__class__.__name__}')
+    def __add__(self, other: object) -> 'Vector':
+        if not isinstance(other, Vector):
+            return NotImplemented
+        return Vector(self.x + other.x, self.y + other.y)
 
-    def __add__(self, other):
-        if isinstance(other, self.__class__):
-            return self.__class__(self.x + other.x, self.y + other.y)
-        else:
-            raise TypeError(
-                f'cannot add {self.__class__.__name__} to    {other.__class__.__name__}')
-
-    def __eq__(self, other):
-        return self.x, self.y == other.x, other.y
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Vector):
+            return NotImplemented
+        return (self.x, self.y) == (other.x, other.y)
 
 
 class Particle:
-    def __init__(self, pos: 'Vector',
-                 velocity: 'Vector',
+    def __init__(self, pos: Vector,
+                 velocity: Vector,
                  radius: int,
                  lifespan: int):
         self.pos = pos
@@ -45,66 +38,64 @@ class Particle:
         self.lifespan = lifespan
 
     @classmethod
-    def new_random(cls, max_x, max_y, wind=0):
+    def new_random(cls, max_x: int, max_y: int) -> 'Particle':
         pos = Vector(max_x, randint(0, max_y))
-        vel = Vector(randint(-3, 0), wind)
+        vel = Vector(randint(-4, 0), 0)
         rad = randint(max_y//50, max_y//5)
-        lifespan = randint(max_x//3, max_x//2)
+        lifespan = randint(max_x//4, max_x//3)
         return cls(pos, vel, rad, lifespan)
+
+    @property
+    def radius(self) -> int:
+        return self.lifespan - self.age
 
 
 class Buffer:
     def __init__(self, rows: int, columns: int):
         self.rows = rows
         self.columns = columns
-        self.buffer = {}
-        self.partcles = []
+        self.buffer: dict = {}
+        self.partcles: List[Particle] = []
         for _ in range(self.columns):
             self.partcles.append(Particle.new_random(self.rows, self.columns))
 
-    def valid_particle(self, partcle: 'Particle'):
-        return partcle.lifespan > partcle.age and 0 <= partcle.pos.x < self.rows and 0 <= partcle.pos.y < self.columns
+    def valid_particle(self, p: Particle) -> bool:
+        return (p.lifespan > p.age)
 
-    def draw_tick(self, tick):
-        for p in self.partcles:
-            radius = p.lifespan - p.age
-            for x in range(-radius, radius + 1):
-                for y in range(-radius, radius + 1):
-                    if x*x + y*y <= radius * radius:
-                        x_ = x + p.pos.x
-                        y_ = y + p.pos.y
-                        if 0 <= x_ < self.rows and 0 <= y_ < self.columns:
-                            self.buffer[(x_, y_)] = ' ', 1
-
+    def draw_tick(self, tick: int) -> Dict[Tuple[int, int], Tuple[str, int]]:
+        buffer: Dict[Tuple[int, int], Tuple[str, int]] = {}
         for idx, p in enumerate(self.partcles):
             p.pos = p.pos + p.velocity
             p.age += 1
-            wind = 0
             if not self.valid_particle(p):
                 self.partcles[idx] = Particle.new_random(
-                    self.rows, self.columns, wind)
+                    self.rows, self.columns)
 
         for p in self.partcles:
-            radius = p.lifespan - p.age
-            for x in range(-radius, radius + 1):
-                for y in range(-radius, radius + 1):
-                    if x*x + y*y <= radius * radius:
-                        x_ = x + p.pos.x
-                        y_ = y + p.pos.y
-                        if 0 <= x_ < self.rows and 0 <= y_ < self.columns:
-                            self.buffer[(x_, y_)] = '#', min(p.age, NUM_COLORS)
+            radius = p.radius
+            for x_ in range(-radius, radius + 1):
+                for y_ in range(-radius, radius + 1):
+                    if (x_*x_ + y_*y_) <= (radius * radius):
+                        x = x_ + p.pos.x
+                        y = y_ + p.pos.y
+                        if ((x, y) in buffer
+                            or x < 0 or x >= self.rows
+                                or y < 0 or y >= self.columns):
+                            continue
+                        if p.age <= NUM_COLORS:
+                            color = p.age
+                        else:
+                            color = NUM_COLORS
+                        buffer[(x, y)] = '#', color
+        return buffer
 
 
 NUM_COLORS = 12
 
 
-def main(stdscr):
-    # Clear screen
-    curses.curs_set(0)
-    curses.cbreak()
-    curses.noecho()
-    stdscr.clear()
-    stdscr.refresh()
+def main(stdscr) -> None:  # type: ignore
+    curses.curs_set(False)
+    curses.use_default_colors()
     for i, c in enumerate((15, 228, 192, 191, 190, 184, 178, 172, 166, 202, 130, 242), start=1):
         curses.init_pair(i, c, curses.COLOR_BLACK)
 
@@ -112,30 +103,27 @@ def main(stdscr):
     buffer = Buffer(rows - 1, columns)
     tick = 0
     time_redraw = time.time_ns()
-    FPS = 24
+    FPS = 15
     while True:
-        if time.time_ns() <= time_redraw:
-            time.sleep((time_redraw - time.time_ns())/1e9)
-
-        time_redraw = time.time_ns() + 1e9/FPS
-
         # handle resize
         rows, columns = stdscr.getmaxyx()
         if (rows, columns) != (buffer.rows + 1, buffer.columns):
             buffer = Buffer(rows - 1, columns)
-            stdscr.clear()
-            stdscr.refresh()
 
-        buffer.draw_tick(tick)
-        for (row, column), (value, color) in buffer.buffer.items():
+        stdscr.clear()
+        if time.time_ns() < time_redraw:
+            time.sleep((time_redraw - time.time_ns())/1e9)
+
+        time_redraw = time.time_ns() + int(1e9/FPS)
+
+        for (row, column), (value, color) in buffer.draw_tick(tick).items():
             stdscr.addstr(row, column, value, curses.color_pair(color))
-        tick += 1
         stdscr.refresh()
-        # time.sleep(1/30)
+        tick += 1
 
 
 if __name__ == "__main__":
     try:
         curses.wrapper(main)
     except KeyboardInterrupt:
-        pass
+        exit(0)
