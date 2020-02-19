@@ -1,6 +1,7 @@
-.venv/
+venv/
 .vscode
 .mypy_cache
 *.pyc
 /Numbers\ Persistence/numbers_persistence
 /Divisors Sum/rust/target
+node_modules
