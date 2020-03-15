@@ -3,8 +3,8 @@
 import argparse
 import math
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('maxN', type=int, nargs=1)
+parser = argparse.ArgumentParser(description="Process some integers.")
+parser.add_argument("maxN", type=int, nargs=1)
 
 args = parser.parse_args()
 n = int(args.maxN[0])

@@ -20,7 +20,9 @@ class Fluid:
     Vy0: List[List[float]] = field(init=False)
 
     def __post_init__(self):
-        def zeros(N): return [[0. for _ in range(N)] for _ in range(N)]
+        def zeros(N):
+            return [[0.0 for _ in range(N)] for _ in range(N)]
+
         self.s = zeros(self.size)
         self.density = zeros(self.size)
 
@@ -33,37 +35,67 @@ class Fluid:
     def add_density(self, x: int, y: int, amount: float) -> None:
         self.density[x][y] += amount
 
-    def add_velocity(self, x: int, y: int, amount_x: float = 0., amount_y: float = 0.) -> None:
+    def add_velocity(
+        self, x: int, y: int, amount_x: float = 0.0, amount_y: float = 0.0
+    ) -> None:
         self.Vx[x][y] += amount_x
         self.Vy[x][y] += amount_y
 
     # TODO: @staticmethod?
-    def diffuse(self, b: int, x: List[List[float]], x0: List[List[float]], diff: float, dt: float, it: int = 10):
+    def diffuse(
+        self,
+        b: int,
+        x: List[List[float]],
+        x0: List[List[float]],
+        diff: float,
+        dt: float,
+        it: int = 10,
+    ):
         a = dt * diff * (self.size - 2) ** 2
         self.lin_solve(b, x, x0, a, 1 + 6 * a, it)
 
-    def lin_solve(self, b: int, x: List[List[float]], x0: List[List[float]], a: float, c: float, it: int):
-        c_recip = 1/c
+    def lin_solve(
+        self,
+        b: int,
+        x: List[List[float]],
+        x0: List[List[float]],
+        a: float,
+        c: float,
+        it: int,
+    ):
+        c_recip = 1 / c
         for _ in range(it):
             for i in range(1, self.size - 1):
                 for j in range(1, self.size - 1):
-                    x[i][j] = (x0[i][j] + a * (x[i+1][j]
-                                               + x[i-1][j]
-                                               + x[i][j+1]
-                                               + x[i][j-1])) * c_recip
+                    x[i][j] = (
+                        x0[i][j]
+                        + a * (x[i + 1][j] + x[i - 1][j] + x[i][j + 1] + x[i][j - 1])
+                    ) * c_recip
         self.set_bnd(b, x)
 
-    def project(self, vel_x: List[List[float]], vel_y: List[List[float]], p: List[List[float]], div: List[List[float]],  it: int):
-        '''This function is also somewhat mysterious as to exactly how it
+    def project(
+        self,
+        vel_x: List[List[float]],
+        vel_y: List[List[float]],
+        p: List[List[float]],
+        div: List[List[float]],
+        it: int,
+    ):
+        """This function is also somewhat mysterious as to exactly how it
         works, but it does some more running through the data and setting
-        values, with some calls to lin_solve thrown in for fun.'''
+        values, with some calls to lin_solve thrown in for fun."""
         for j in range(1, self.size - 1):
             for i in range(1, self.size - 1):
-                div[i][j] = -0.5 * (vel_x[i+1][j]
-                                    - vel_x[i-1][j]
-                                    + vel_y[i][j+1]
-                                    - vel_y[i][j-1]
-                                    )/self.size
+                div[i][j] = (
+                    -0.5
+                    * (
+                        vel_x[i + 1][j]
+                        - vel_x[i - 1][j]
+                        + vel_y[i][j + 1]
+                        - vel_y[i][j - 1]
+                    )
+                    / self.size
+                )
                 p[i][j] = 0
 
         self.set_bnd(0, div)
@@ -72,24 +104,32 @@ class Fluid:
 
         for j in range(1, self.size - 1):
             for i in range(1, self.size - 1):
-                vel_x[i][j] -= 0.5 * (p[i+1][j] - p[i-1][j]) * self.size
-                vel_y[i][j] -= 0.5 * (p[i][j+1] - p[i][j-1]) * self.size
+                vel_x[i][j] -= 0.5 * (p[i + 1][j] - p[i - 1][j]) * self.size
+                vel_y[i][j] -= 0.5 * (p[i][j + 1] - p[i][j - 1]) * self.size
 
         self.set_bnd(1, vel_x)
         self.set_bnd(2, vel_y)
 
-    def advect(self, b: int, d: List[List[float]], d0: List[List[float]],  vel_x: List[List[float]], vel_y: List[List[float]], dt: float):
-        '''This function is responsible for actually moving things around.
+    def advect(
+        self,
+        b: int,
+        d: List[List[float]],
+        d0: List[List[float]],
+        vel_x: List[List[float]],
+        vel_y: List[List[float]],
+        dt: float,
+    ):
+        """This function is responsible for actually moving things around.
         To that end, it looks at each cell in turn. In that cell, it grabs
         the velocity, follows that velocity back in time, and sees where
         it lands. It then takes a weighted average of the cells around the
         spot where it lands, then applies that value to the current cell.
-        '''
+        """
         dtx = dt * (self.size - 2)
         dty = dt * (self.size - 2)
 
-        for j in range(1, self.size-1):
-            for i in range(1, self.size-1):
+        for j in range(1, self.size - 1):
+            for i in range(1, self.size - 1):
                 tmp1 = dtx * vel_x[i][j]
                 tmp2 = dty * vel_y[i][j]
                 x = i - tmp1
@@ -115,20 +155,21 @@ class Fluid:
                 t0 = 1 - t1
 
                 # TODO: check this
-                d[i][j] = (s0 * (t0 * d0[i0][j0] + t1 * d0[i0][j1])
-                           + s1 * (t0 * d0[i1][j0] + t1 * d0[i1][j1]))
+                d[i][j] = s0 * (t0 * d0[i0][j0] + t1 * d0[i0][j1]) + s1 * (
+                    t0 * d0[i1][j0] + t1 * d0[i1][j1]
+                )
 
         self.set_bnd(b, d)
 
     def set_bnd(self, b: int, x: List[List[float]]):
-        '''This is short for "set bounds", and it's a way to keep fluid from
-        leaking out of your box.'''
+        """This is short for "set bounds", and it's a way to keep fluid from
+        leaking out of your box."""
 
-        for i in range(1, self.size-1):
+        for i in range(1, self.size - 1):
             x[i][0] = -x[i][1] if b == 2 else x[i][1]
             x[i][-1] = -x[i][-2] if b == 2 else x[i][-2]
 
-        for j in range(1, self.size-1):
+        for j in range(1, self.size - 1):
             x[0][j] = -x[1][j] if b == 1 else x[1][j]
             x[-1][j] = -x[-2][j] if b == 1 else x[-2][j]
 
@@ -136,7 +177,6 @@ class Fluid:
         x[0][-1] = 0.5 * (x[1][-1] + x[0][-2])
         x[-1][0] = 0.5 * (x[-2][0] + x[-1][1])
         x[-1][-1] = 0.5 * (x[-2][-1] + x[-1][-2])
-
 
     def step(self):
         self.diffuse(1, self.Vx0, self.Vx, self.viscosity, self.dt, 4)
