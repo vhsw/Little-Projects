@@ -1,6 +1,5 @@
-// eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }]
 // eslint-disable-next-line spaced-comment
-/// <reference path="../node_modules/@types/p5/global.d.ts" />
+/// <reference path="../../node_modules/@types/p5/global.d.ts" />
 
 
 let SIZE;
@@ -17,13 +16,16 @@ function euclideanSquare(p1, p2) {
 const sides = new Set();
 const points = [];
 
+// eslint-disable-next-line no-unused-vars
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   SIZE = Math.min(windowWidth, windowHeight);
 
   for (let i = 0; i < 2 ** DIM; i += 1) {
     const coords = [];
+    // eslint-disable-next-line no-bitwise
     for (let mask = 1; mask < 2 ** DIM; mask <<= 1) {
+      // eslint-disable-next-line no-bitwise
       const bitSet = ((i & mask) > 0);
       coords.push(bitSet ? 0.5 : -0.5);
     }
@@ -78,7 +80,7 @@ function project(point, angle) {
   return p.map((s) => s * SIZE * 0.5);
 }
 
-
+// eslint-disable-next-line no-unused-vars
 function draw() {
   background(0);
 
