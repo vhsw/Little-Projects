@@ -15,7 +15,10 @@ export default {
                     time: {
                         unit: 'day'
                     }
-                }]
+                }],
+                // yAxes: [{
+                //     type: 'logarithmic',
+                // }]
             },
             maintainAspectRatio: false
         }

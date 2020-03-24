@@ -1,84 +1,64 @@
 <template>
   <section>
-    <b-tabs>
-      <b-tab-item label="Table">
-        <b-table :data="data" :columns="columns" :checked-rows.sync="checkedRows" checkable></b-table>
-      </b-tab-item>
-    </b-tabs>
+    <section>
+      <b-field>
+        <b-datepicker placeholder="Date" icon="calendar" editable expanded v-model="newEntry.date"></b-datepicker>
+        <b-input placeholder="Infected" type="number" min="0" expanded v-model="newEntry.infected"></b-input>
+        <p class="control">
+          <b-button class="button is-primary" @click="submitEntry" icon-right="plus" />
+        </p>
+      </b-field>
+    </section>
+    <section>
+      <b-table
+        :data="tableData"
+        :columns="columns"
+        :mobile-cards="false"
+        :default-sort="['date', 'desc']"
+        narrowed
+      ></b-table>
+    </section>
   </section>
 </template>
-
 <script>
+import { format } from "date-fns";
 export default {
+  props: ["dates", "infected"],
+  computed: {
+    tableData() {
+      return this.dates.map((date, i) => ({
+        date: format(date, "dd.MM.yyyy"),
+        infected: this.infected[i]
+      }));
+    }
+  },
   data() {
-    const data = [
-      {
-        id: 1,
-        first_name: "Jesse",
-        last_name: "Simmons",
-        date: "2016-10-15 13:43:27",
-        gender: "Male"
-      },
-      {
-        id: 2,
-        first_name: "John",
-        last_name: "Jacobs",
-        date: "2016-12-15 06:00:53",
-        gender: "Male"
-      },
-      {
-        id: 3,
-        first_name: "Tina",
-        last_name: "Gilbert",
-        date: "2016-04-26 06:26:28",
-        gender: "Female"
-      },
-      {
-        id: 4,
-        first_name: "Clarence",
-        last_name: "Flores",
-        date: "2016-04-10 10:28:46",
-        gender: "Male"
-      },
-      {
-        id: 5,
-        first_name: "Anne",
-        last_name: "Lee",
-        date: "2016-12-06 14:38:38",
-        gender: "Female"
-      }
-    ];
-
     return {
-      data,
-      checkboxPosition: "left",
-      checkedRows: [data[1], data[3]],
       columns: [
-        {
-          field: "id",
-          label: "ID",
-          width: "40",
-          numeric: true
-        },
-        {
-          field: "first_name",
-          label: "First Name"
-        },
-        {
-          field: "last_name",
-          label: "Last Name"
-        },
         {
           field: "date",
           label: "Date",
-          centered: true
+          width: "40",
+          sortable: true
         },
         {
-          field: "gender",
-          label: "Gender"
+          field: "infected",
+          label: "Infected",
+          numeric: true
         }
-      ]
+      ],
+      newEntry: {}
     };
+  },
+  methods: {
+    submitEntry() {
+      console.log(this.newEntry);
+      let { date, infected } = this.newEntry;
+      this.$emit("submit", {
+        date: format(date, "yyyy-MM-dd"),
+        infected: parseInt(infected)
+      });
+    }
   }
 };
 </script>
