@@ -49,7 +49,7 @@ li:before {
 .spacer {
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   width: 30px;
   height: 80px;
@@ -60,6 +60,7 @@ li:before {
   border-radius: var(--border-radius);
   background: var(--bg-color);
   box-shadow: 5px 5px 10px #bababa, -5px -5px 10px #e4e4e4;
+  margin: 10px 0;
 }
 
 .row {
