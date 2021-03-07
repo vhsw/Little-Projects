@@ -2,6 +2,12 @@
 
 Repository for small projects that do not deserve their own repo
 
+## Ant Colony
+
+![Screenshot](Ant%20Colony/screenshot.png)
+
+[Demo](https://vhsw.github.io/Little-Projects/Ant%20Colony/src/index.html)
+
 ## Contact Tracing
 
 ![Screenshot](Contact%20Tracing/screenshot.png)

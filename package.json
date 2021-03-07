@@ -12,34 +12,31 @@
     "url": "https://github.com/vhsw/Little-Projects/issues"
   },
   "homepage": "https://github.com/vhsw/Little-Projects#readme",
-  "devDependencies": {
-    "eslint": "^6.8.0",
+  "dependencies": {
+    "@types/p5": "^0.9.0",
+    "standard": "^16.0.3",
+    "eslint": "^7.21.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-p5js": "^1.0.1",
-    "eslint-plugin-import": "^2.20.2"
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1"
   },
-  "dependencies": {
-    "@types/p5": "^0.9.0"
-  },
+  "devDependencies": {},
   "eslintConfig": {
     "env": {
-      "browser": true
+      "browser": true,
+      "es6": true
     },
     "extends": [
-      "airbnb-base",
-      "eslint:recommended",
+      "standard",
       "p5js"
     ],
     "rules": {
       "no-unused-vars": [
         "error",
         {
-          "no-param-reassign": [
-            "error",
-            {
-              "props": false
-            }
-          ],
           "varsIgnorePattern": "setup|draw|preload|mousePressed|keyPressed"
         }
       ]
