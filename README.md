@@ -4,9 +4,9 @@ Repository for small projects that do not deserve their own repo
 
 ## Contact Tracing
 
-![Screenshot](Contact-Tracing/screenshot.png)
+![Screenshot](Contact%20Tracing/screenshot.png)
 
-[Demo](https://vhsw.github.io/Little-Projects/Contact-Tracing/src/index.html)
+[Demo](https://vhsw.github.io/Little-Projects/Contact%20Tracing/src/index.html)
 
 ## Digital Rain
 
