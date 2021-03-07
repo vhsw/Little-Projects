@@ -1,5 +1,5 @@
 # Fireplace
 
-Console app, that draws fireplace in you terminal.
+Fireplace in your terminal
 
-![Result](result.gif)
+![Screenshot](screenshot.gif)
