@@ -1,5 +1,5 @@
-# Matrix digital rain
+# Digital Rain
 
-Console app, that draws dropping characters in you terminal.
+Dropping characters in your terminal
 
-![Result](result.png)
+![Screenshot](screenshot.png)

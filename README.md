@@ -10,6 +10,8 @@ Repository for small projects that do not deserve their own repo
 
 ## Digital Rain
 
+![Screenshot](Digital%20Rain/screenshot.png)
+
 ## Divisors Sum
 
 ## Double Pendulum
@@ -26,4 +28,12 @@ Repository for small projects that do not deserve their own repo
 
 ## Sliding Clock
 
+![Screenshot](Sliding%20Clock/screenshot.png)
+
+[Demo](https://vhsw.github.io/Little-Projects/Sliding%20Clock/src/index.html)
+
 ## Tesseract
+
+![Screenshot](Tesseract/screenshot.png)
+
+[Demo](https://vhsw.github.io/Little-Projects/Tesseract/src/index.html)
