@@ -1,28 +1,37 @@
+import shutil
 from copy import deepcopy
 from random import randint
 from time import sleep
-import shutil
 
-y, x = shutil.get_terminal_size()
-f = [[randint(0, 5) == 0 for _ in range(y)] for _ in range(x)]
+columns, lines = shutil.get_terminal_size()
+field = [[randint(0, 5) == 0 for _ in range(columns)] for _ in range(lines)]
 while True:
-    t = deepcopy(f)
-    for i, row in enumerate(f):
-        for j, c in enumerate(row):
-            l = j - 1
-            r = (j + 1) % y
-            u = f[i - 1]
-            m = f[i]
-            b = f[(i + 1) % x]
-            s = sum((u[l], u[j], u[r], m[l], m[r], b[l], b[j], b[r]))
+    tmp = deepcopy(field)
+    for row_num, row in enumerate(field):
+        for col_num, char in enumerate(row):
+            l = col_num - 1
+            r = (col_num + 1) % columns
+            top = field[row_num - 1]
+            middle = field[row_num]
+            bottom = field[(row_num + 1) % lines]
+            s = sum((
+                top[l],
+                top[col_num],
+                top[r],
+                middle[l],
+                middle[r],
+                bottom[l],
+                bottom[col_num],
+                bottom[r],
+                ))
             if s == 2:
-                t[i][j] = c
+                tmp[row_num][col_num] = char
             elif s == 3:
-                t[i][j] = True
+                tmp[row_num][col_num] = True
             else:
-                t[i][j] = False
+                tmp[row_num][col_num] = False
     print("\033[0;0H")
-    for row in t:
+    for row in tmp:
         print("".join(" X"[c] for c in row))
-    f = t
+    field = tmp
     sleep(0.5)

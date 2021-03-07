@@ -16,13 +16,19 @@ Repository for small projects that do not deserve their own repo
 
 ## Double Pendulum
 
+![Screenshot](Double%20Pendulum/screenshot.png)
+
 ## Every Possible Image
 
 ## Fireplace
 
+![Screenshot](Fireplace/screenshot.gif)
+
 ## Fluid Simulation
 
 ## Game of Life
+
+![Screenshot](Game%20of%20Life/screenshot.png)
 
 ## Numbers Persistence
 
