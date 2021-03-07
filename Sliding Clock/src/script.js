@@ -1,5 +1,5 @@
 function move(item, value) {
-  item.style.transform = "translate(0px, " + -value * 100 + "px)";
+  item.style.transform = `translate(0px, ${-value * 100}px)`;
 }
 
 function update() {

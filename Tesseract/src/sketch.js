@@ -1,6 +1,4 @@
-// eslint-disable-next-line spaced-comment
-/// <reference path="../../node_modules/@types/p5/global.d.ts" />
-
+/// <reference path="../../node_modules/eslint-config-p5js" />
 
 let SIZE;
 const DIM = 4;
@@ -16,7 +14,6 @@ function euclideanSquare(p1, p2) {
 const sides = new Set();
 const points = [];
 
-// eslint-disable-next-line no-unused-vars
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   SIZE = Math.min(windowWidth, windowHeight);
@@ -26,7 +23,7 @@ function setup() {
     // eslint-disable-next-line no-bitwise
     for (let mask = 1; mask < 2 ** DIM; mask <<= 1) {
       // eslint-disable-next-line no-bitwise
-      const bitSet = ((i & mask) > 0);
+      const bitSet = (i & mask) > 0;
       coords.push(bitSet ? 0.5 : -0.5);
     }
     points.push(coords);
@@ -54,11 +51,8 @@ function rotate4d(p, angle) {
     [0, 0, s, c],
   ];
 
-  return rotationMatrix.map((v) => v.reduce(
-    (acc, n, i) => acc + n * p[i], 0,
-  ));
+  return rotationMatrix.map((v) => v.reduce((acc, n, i) => acc + n * p[i], 0));
 }
-
 
 function flattern(point, distance = 1.5) {
   const len = point.length;
@@ -80,12 +74,10 @@ function project(point, angle) {
   return p.map((s) => s * SIZE * 0.5);
 }
 
-// eslint-disable-next-line no-unused-vars
 function draw() {
   background(0);
 
   stroke(255);
-
 
   rotateY(frameCount * 0.003);
   const angle = frameCount * 0.02;
