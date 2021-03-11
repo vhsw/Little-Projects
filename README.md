@@ -2,11 +2,11 @@
 
 Repository for small projects that do not deserve their own repo
 
-## Ant Colony
+## Ant System
 
-![Screenshot](Ant%20Colony/screenshot.png)
+![Screenshot](Ant%20System/screenshot.png)
 
-[Demo](https://vhsw.github.io/Little-Projects/Ant%20Colony/src/index.html)
+[Demo](https://vhsw.github.io/Little-Projects/Ant%20System/src/index.html)
 
 ## Contact Tracing
 
