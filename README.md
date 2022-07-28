@@ -2,6 +2,15 @@
 
 Repository for small projects that do not deserve their own repo
 
+# Among r/Place
+
+![Screenshot](Among%20Place/screenshot.gif)
+
+All tiny amounguses (amongii?) highlighted
+
+[Demo](https://vhsw.github.io/Little-Projects/Among%20Place/src/index.html)
+
+
 ## Ant System
 
 ![Screenshot](Ant%20System/screenshot.png)
