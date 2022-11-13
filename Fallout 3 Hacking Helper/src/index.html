@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fallout 3 Hacking Helper</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="words.js"></script>
+  <style>
+    .mono {
+      font-family: monospace;
+    }
+
+  </style>
+</head>
+
+<script>
+  // @ts-check
+  "use strict"
+  /**
+  * @typedef {{guess: string, correct: number}} Guess
+  * @typedef {{guess: string, correct: number}} Suggestion
+  * @constant {string[]} words
+  */
+
+  /** @type {Guess[]} */
+  const guesses = []
+  /** @type {string[]} */
+  var words
+
+  /** @type {string[]} */
+  let suggestions = null
+  /** */
+  const search = () => {
+    const guess = getGuess()
+    addGuessToTable(guess)
+    guesses.push(guess)
+    suggestions = doSearch(guesses, suggestions ?? words)
+    console.log(suggestions)
+    updateResults(suggestions)
+    updateSuggestions(suggestions)
+  }
+  const reset = () => {
+    location.reload()
+  }
+  /** @returns {Guess} */
+  const getGuess = () => {
+    const guess = document.getElementById("guess")
+    if (!(guess instanceof HTMLInputElement)) throw Error()
+    const correct = document.getElementById("correct")
+    if (!(correct instanceof HTMLInputElement)) throw Error()
+    return { guess: guess.value.trim().toUpperCase(), correct: parseInt(correct.value) }
+  }
+  /** @param {Guess} guessObj */
+  const addGuessToTable = (guessObj) => {
+    const { guess, correct } = guessObj
+    const guesses = document.getElementById('guesses')
+    if (!(guesses instanceof HTMLTableElement)) throw Error()
+    let row = guesses.getElementsByTagName('tbody')[0].insertRow();
+    row.className = 'mono'
+    let guessCell = row.insertCell();
+    guessCell.appendChild(document.createTextNode(guess));
+    let correctCell = row.insertCell();
+    correctCell.appendChild(document.createTextNode(`${correct}/${guess.length}`));
+  }
+  /**
+   * @param {Guess[]} guesses
+   * @param {string[]} suggestions
+   */
+  const doSearch = (guesses, suggestions) => {
+    for (let guess of guesses) {
+      const result = []
+      for (let word of suggestions) {
+        if (checkGuess(guess, word)) {
+          result.push(word)
+        }
+      }
+      suggestions = result
+    }
+    return suggestions
+  }
+  /**
+   * @param {Guess} guessObj
+   * @param {string} word
+   */
+  const checkGuess = (guessObj, word) => {
+    const { guess, correct } = guessObj
+
+    if (word.length != guess.length) {
+      return false
+    }
+
+    let matches = 0
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] == guess[i]) {
+        matches += 1
+      }
+    }
+    return matches == correct
+  }
+  /** @param {string[]} suggestions */
+  const updateResults = (suggestions) => {
+    const fragment = document.createDocumentFragment();
+    suggestions.forEach(word => {
+      const li = document.createElement('li');
+      li.textContent = word;
+      li.className = 'mono'
+      fragment.appendChild(li);
+    })
+    document.getElementById("results").replaceChildren(fragment);
+  }
+  /** @param {string[]} suggestions */
+  const updateSuggestions = (suggestions) => {
+    const fragment = document.createDocumentFragment();
+    suggestions.forEach(word => {
+      fragment.appendChild(new Option(word));
+    })
+    document.getElementById("suggestions").replaceChildren(fragment);
+  }
+</script>
+
+<body onload="updateSuggestions(words)">
+  <h1>Fallout 3 Hacking Helper</h1>
+  <p>
+    <label for="guess">Guess</label>
+    <input id="guess" list="suggestions" />
+    <datalist id="suggestions"></datalist>
+    <label for="correct">Correct letters</label>
+    <input type="number" id="correct" />
+    <button onclick="search()">Submit</button>
+    <button onclick="reset()">Reset</button>
+  </p>
+  <table id="guesses">
+    <caption>
+      <h3>Guess history</h3>
+    </caption>
+    <thead>
+      <tr>
+        <th>Guess</th>
+        <th>Correct</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <h3>Results</h3>
+  <p>
+  <ol id="results"> </ol>
+  </p>
+</body>
+
+</html>
