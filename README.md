@@ -41,6 +41,12 @@ All tiny amounguses (amongii?) highlighted
 
 ## Fluid Simulation
 
+## Fallout 3 Hacking Helper
+
+![Screenshot](Fallout%203%20Hacking%20Helper/screenshot.png)
+
+[Demo](https://vhsw.github.io/Little-Projects/Fallout%203%20Hacking%20Helper/src/index.html)
+
 ## Game of Life
 
 ![Screenshot](Game%20of%20Life/screenshot.png)
