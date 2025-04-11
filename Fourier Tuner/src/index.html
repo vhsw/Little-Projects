@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fourier Tuner</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    "use strict";
+    const canvas = document.querySelector("#canvas");
+    const ctx = canvas.getContext("2d");
+    const onSuccess = async (stream) => {
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = new AnalyserNode(audioCtx, {
+        fftSize: 16384,
+        smoothingTimeConstant: 0.95,
+      });
+      source.connect(analyser);
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        ctx.canvas.width = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgb(255, 255, 255)";
+        ctx.beginPath();
+        let sliceWidth = WIDTH / Math.log2(bufferLength);
+        let x = 0;
+        ctx.moveTo(0, canvas.height);
+        for (let i = 0; i < bufferLength; i++) {
+          let x = Math.log2(i + 1) * sliceWidth;
+          let y = ((255 - dataArray[i]) * HEIGHT) / 255;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.stroke();
+        let max = 0;
+        let maxIndex = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          if (dataArray[i] > max) {
+            maxIndex = i;
+            max = dataArray[i];
+          }
+        }
+        const freq = (
+          (maxIndex / bufferLength) *
+          audioCtx.sampleRate
+        ).toFixed(2);
+        ctx.font = "2rem sans-serif";
+        ctx.fillStyle = "rgb(255, 255, 255)";
+        ctx.fillText(`${freq} Hz`, 50, 50);
+        const lines = 12 * 8 + 1;
+        for (let i = 0; i < lines; i++) {
+          ctx.beginPath();
+          const freq = Math.pow(2, i / 12) * 13.75 / audioCtx.sampleRate * bufferLength;
+          if (i % 12 === 0) {
+            ctx.lineWidth = 2;
+          }
+          else {
+            ctx.lineWidth = 1;
+          }
+          const x = Math.log2(freq) * sliceWidth;
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.stroke();
+        }
+      }
+      draw();
+    };
+    const onError = (error) => {
+      console.error("Error accessing microphone:", error);
+    };
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+      })
+      .then(onSuccess, onError);
+  </script>
+</body>
+
+</html>
